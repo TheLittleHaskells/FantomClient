@@ -1,2 +1,2 @@
 # FantomClient
-CMPE150 Chat Client
+CMPS112 Chat Client
