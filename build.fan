@@ -8,6 +8,7 @@ class Build : build::BuildPod
     srcDirs = [`fan/`]
     depends = [
       "sys 1.0",
+      "inet 0+",
       "concurrent 0+"
       ]
   }
