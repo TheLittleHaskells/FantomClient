@@ -9,20 +9,39 @@ using inet
 class Main{
 
   static Void main(Str[] args){
+    /**
+     * We start by parsing the configuration file. The configuration file
+     * must be specified as an argument on the command line.
+     **/
+    if(args.size != 1){  // check correct # of args
+      echo("Usage: FantomClient <config file>")
+      Env.cur.exit(1)
+    }
     Str:Str configOpts := [:]
     configFile := Uri(args[0]).toFile
-    
-    // Parse Config
+    if(!configFile.exists){  // make sure file exists
+      echo("error: Config file doesn't exist.")
+      Env.cur.exit(1)
+    }
     configFile.readAllLines.each |Str x| { 
       tokens := x.split("=".chars[0], true)
       configOpts.add(tokens[0], tokens[1]) 
     }
     
-    echo("finished parsing config")
-
-    server := Handshakes.clientShake(configOpts["USERNAME"], TcpSocket().connect(IpAddr(configOpts["ADDRESS"]), configOpts["PORT"].toInt))
+    /**
+     * We then perform the handshake with the server and establish our
+     * connection on a random port.
+     **/
+    server := Handshakes.clientShake(configOpts["USERNAME"], 
+      TcpSocket().connect(IpAddr(configOpts["ADDRESS"]), 
+        configOpts["PORT"].toInt))
     
-    // Start Message Handler
+    /**
+     * We create a new thread to handle input from the user. We will process
+     * the result of this thread in the main program loop. The thread expects
+     * the prompt to be displayed to the user to be provided as a string sent
+     * to the thread. It will return a Future with the user's input.
+     **/
     pool := ActorPool()
     listener := Actor(pool) |Str prompt->Str| {
       echo(prompt)
@@ -30,11 +49,16 @@ class Main{
     }
     command := listener.send("~>")
     
-    // Start UI
+    /**
+     * Main program loop
+     * 
+     * We run through as first check if there's anything in the socket buffer
+     * for us to read. Once that's done, we check our UI thread to see if the
+     * user entered any commands. If they didn't we go to sleep.
+     **/
     while(true){
       if(server.in.avail > 0){
         message := server.in.readLine
-        echo("got a message...\n")
         readMessage(message.toStr);
       }
       if(command.isDone){
@@ -43,14 +67,19 @@ class Main{
       }
       Actor.sleep(250.toDuration);
     }
-    echo("finished main")
   }
   
+  /**
+   * Processes a message sent by the server
+   **/
   public static Void readMessage(Str payload){
-    echo(payload)
+    echo("readMessage got: " + payload + " but not implemented.")
   }
   
+  /**
+   * Processes a command entered by the user.
+   **/
   public static Void processCommand(Str command){
-    echo("processing " + command)
+    echo("processCommand got: " + command + " but not yet implemented.")
   }
 }
