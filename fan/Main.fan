@@ -61,6 +61,12 @@ class Main{
         message := server.in.readLine
         readMessage(message.toStr);
       }
+      // Here we check if the command thread we started earlier has completed. If
+      // it has completed, it means that the user entered something we need to
+      // process. We can get that value by using command.get. Once we're done with
+      // it, we need to start a new thread to process the user's next command by
+      // sending a new prompt to display to the user to the thread, which tells it
+      // to start again.
       if(command.isDone){
         processCommand(command.get)
         command = listener.send("~>")
