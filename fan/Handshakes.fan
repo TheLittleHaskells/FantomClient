@@ -41,11 +41,7 @@ class Handshakes {
     
     server.close
     
-    echo("connecting to " + address +":"+ portToUse)
-
     Actor.sleep(50.toDuration)
-    
-
 
     return TcpSocket().connect(address, portToUse)
   }

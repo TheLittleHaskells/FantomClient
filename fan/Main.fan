@@ -7,7 +7,6 @@ using concurrent
 using inet
 
 class Main{
-
   static Void main(Str[] args){
     /**
      * We start by parsing the configuration file. The configuration file
@@ -57,6 +56,7 @@ class Main{
      * user entered any commands. If they didn't we go to sleep.
      **/
     while(true){
+      sendMessage("CHAT", "Hi", server)
       if(server.in.avail > 0){
         message := server.in.readLine
         readMessage(message.toStr);
@@ -74,6 +74,12 @@ class Main{
       Actor.sleep(250.toDuration);
     }
   }
+ 
+  public static Void sendMessage(Str type, Str payload, TcpSocket client){
+    Str message := type + "@" + payload;
+    client.out.writeChars(message + "\n")
+    client.out.flush
+  } 
   
   /**
    * Processes a message sent by the server
