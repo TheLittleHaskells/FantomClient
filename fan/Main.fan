@@ -47,7 +47,7 @@ class Main{
       return Env.cur.in.readLine
     }
     command := listener.send("~>")
-    
+
     /**
      * Main program loop
      * 
@@ -56,7 +56,6 @@ class Main{
      * user entered any commands. If they didn't we go to sleep.
      **/
     while(true){
-      sendMessage("CHAT", "Hi", server)
       if(server.in.avail > 0){
         message := server.in.readLine
         readMessage(message.toStr);
@@ -68,7 +67,15 @@ class Main{
       // sending a new prompt to display to the user to the thread, which tells it
       // to start again.
       if(command.isDone){
-        processCommand(command.get)
+        message := command.get().toStr;
+        if(message.startsWith("/quit")){
+          sendMessage("GTFO",configOpts["USERNAME"],server)
+          Env.cur.exit();
+        }
+        if(message.startsWith("/list")){
+          sendMessage("LIST",configOpts["USERNAME"],server);
+        }
+        
         command = listener.send("~>")
       }
       Actor.sleep(250.toDuration);
@@ -86,12 +93,27 @@ class Main{
    **/
   public static Void readMessage(Str payload){
     echo("readMessage got: " + payload + " but not implemented.")
+    type := payload.getRange(0..4);
+    message := payload.getRange(5..payload.size);
+    if (type[0].equals("CHAT")){
+      displayChat(message);
+    } else if (type[0].equals("LIST")){
+      displayList(message);
+    } else type[0].equals("GTFO"){
+      echo("Server has logged off. Program is shutting down")
+      Env.cur.exit();
+    }
   }
   
-  /**
-   * Processes a command entered by the user.
-   **/
-  public static Void processCommand(Str command){
-    echo("processCommand got: " + command + " but not yet implemented.")
+  public static Void displayChat(Str message){
+    echo(message);
   }
+  
+  public static Void displayList(Str message){
+    userlist := message.split('@');
+    for(Int i:=0; i < userlist.size; i++){
+      echo("\t\t\t"+userlist[i]);
+      }
+  }
+  
 }
