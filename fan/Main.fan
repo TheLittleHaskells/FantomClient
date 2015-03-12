@@ -7,6 +7,7 @@ using concurrent
 using inet
 
 class Main{
+  
   static Void main(Str[] args){
     /**
      * We start by parsing the configuration file. The configuration file
@@ -26,6 +27,7 @@ class Main{
       tokens := x.split("=".chars[0], true)
       configOpts.add(tokens[0], tokens[1]) 
     }
+
     
     /**
      * We then perform the handshake with the server and establish our
@@ -68,14 +70,20 @@ class Main{
       // to start again.
       if(command.isDone){
         message := command.get().toStr;
+
+        // user enters /quit
         if(message.startsWith("/quit")){
           sendMessage("GTFO",configOpts["USERNAME"],server)
           Env.cur.exit();
-        }
-        if(message.startsWith("/list")){
+
+        // user enters /list
+        }else if(message.startsWith("/list")){
           sendMessage("LIST",configOpts["USERNAME"],server);
+          
+        // otherwise, it's a chat message
+        }else{
+          sendMessage("CHAT",command.get.toStr,server)
         }
-        
         command = listener.send("~>")
       }
       Actor.sleep(250.toDuration);
@@ -92,28 +100,30 @@ class Main{
    * Processes a message sent by the server
    **/
   public static Void readMessage(Str payload){
-    echo("readMessage got: " + payload + " but not implemented.")
-    type := payload.getRange(0..4);
-    message := payload.getRange(5..payload.size);
-    if (type[0].equals("CHAT")){
+    type := payload.getRange(0..3);
+    message := payload.getRange(5..payload.size-1);
+    if (type.equals("CHAT")){
       displayChat(message);
-    } else if (type[0].equals("LIST")){
+    } else if (type.equals("LIST")){
       displayList(message);
-    } else type[0].equals("GTFO"){
+    } else if (type.equals("GTFO")){
       echo("Server has logged off. Program is shutting down")
       Env.cur.exit();
+    } else {
+      echo("Invalid message: " + payload)
     }
   }
   
   public static Void displayChat(Str message){
-    echo(message);
+    echo("\t" + message);
+    echo("~>")
   }
   
   public static Void displayList(Str message){
     userlist := message.split('@');
     for(Int i:=0; i < userlist.size; i++){
-      echo("\t\t\t"+userlist[i]);
-      }
+      echo(userlist[i]);
+    }
+    echo("~>")
   }
-  
 }
